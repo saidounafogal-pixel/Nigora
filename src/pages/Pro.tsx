@@ -8,6 +8,8 @@ import { Badge, Button, Card, Input } from '../components/ui'
 import { fmtTime, timeAgo } from '../lib/utils'
 import { mapsLink } from '../lib/geo'
 import { ALERT_STATUS } from './Alerts'
+import MapView, { type MapPoint } from '../components/MapView'
+import type { MapStyleKey } from '../lib/mapStyles'
 import { STATUS } from './Trips'
 import type { AlertStatus, TripStatus } from '../lib/types'
 
@@ -41,6 +43,35 @@ export function Kpi({ icon, label, value, tone }: { icon: React.ReactNode; label
         <p className="text-xs text-white/50">{label}</p>
       </div>
     </Card>
+  )
+}
+
+/** Carte opérationnelle : véhicules / voyageurs et alertes */
+export function OpsMap({ trips = [], alerts = [] }: { trips?: OrgTrip[]; alerts?: OrgAlert[] }) {
+  const [style, setStyle] = useState<MapStyleKey>('nuit')
+  const color: Record<string, string> = { active: '#22c55e', overdue: '#f59e0b', arrived: '#737373', planned: '#38bdf8' }
+  const points: MapPoint[] = [
+    ...trips.filter((t) => t.last_lat != null && t.last_lng != null).map((t) => ({ id: 't-' + t.id, lat: t.last_lat!, lng: t.last_lng!, color: color[t.status] ?? '#a3a3a3', label: t.vehicle_plate ?? t.traveler.split(' ')[0] })),
+    ...alerts.filter((a) => a.lat != null && a.lng != null && a.status !== 'closed' && a.status !== 'cancelled').map((a) => ({ id: 'a-' + a.id, lat: a.lat!, lng: a.lng!, color: '#ef4444', label: `SOS ${a.kind}`, pulse: true })),
+  ]
+  const key = points.map((p) => p.id).join(',')
+  return (
+    <div className="relative mb-4 h-[380px] overflow-hidden rounded-[28px] ring-1 ring-white/10" data-testid="carte-ops">
+      <MapView styleKey={style} points={points} zoom={6} center={{ lat: 14.5, lng: 6 }} fitKey={key} fitTo={points.map((p) => [p.lng, p.lat])} />
+      <div className="absolute left-3 top-3 flex gap-1 rounded-full bg-black/60 p-1 backdrop-blur">
+        {(['nuit', 'satellite', 'plan'] as MapStyleKey[]).map((k) => (
+          <button key={k} onClick={() => setStyle(k)} className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${style === k ? 'bg-white text-black' : 'text-white/70'}`}>
+            {k}
+          </button>
+        ))}
+      </div>
+      <div className="absolute bottom-3 left-3 flex flex-wrap gap-2 rounded-2xl bg-black/60 px-3 py-1.5 text-[11px] backdrop-blur">
+        <span>🟢 En route</span>
+        <span>🟠 En retard</span>
+        <span>🔵 Prévu</span>
+        <span>🔴 Alerte</span>
+      </div>
+    </div>
   )
 }
 
@@ -179,6 +210,7 @@ export default function Pro() {
         ))}
       </div>
 
+      {tab === 'live' && <OpsMap trips={trips} alerts={alerts} />}
       {tab === 'live' && (
         <div className="grid gap-4 lg:grid-cols-2">
           <section className="space-y-3">

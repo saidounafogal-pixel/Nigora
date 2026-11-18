@@ -36,7 +36,7 @@ export function SyncManager() {
 
 /** Suivi volontaire des trajets actifs + détection des retards */
 export function TripWatcher() {
-  const { state, upsertTrip, setLastPosition, ready } = useStore()
+  const { state, patchTrip, setLastPosition, ready } = useStore()
   const [tick, setTick] = useState(0)
   const notified = useRef<Set<string>>(new Set())
 
@@ -59,7 +59,7 @@ export function TripWatcher() {
 
       // Retard : l'heure d'arrivée + marge est dépassée sans confirmation
       if (trip.status === 'active' && now > new Date(trip.etaAt).getTime() + OVERDUE_GRACE_MIN * 60000) {
-        upsertTrip({ ...trip, status: 'overdue' })
+        patchTrip(trip.id, { status: 'overdue' })
         if (!notified.current.has(trip.id)) {
           notified.current.add(trip.id)
           navigator.vibrate?.([300, 150, 300])
@@ -77,7 +77,7 @@ export function TripWatcher() {
       getPosition(20000, !state.settings.lowDataMode)
         .then((p) => {
           setLastPosition(p)
-          upsertTrip({ ...trip, positions: [...trip.positions, p].slice(-200) })
+          patchTrip(trip.id, (t) => ({ positions: [...t.positions, p].slice(-200) }))
         })
         .catch(() => undefined)
     }

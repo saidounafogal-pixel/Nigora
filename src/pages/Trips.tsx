@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { MapPin, Play, Plus, Route, Send, Share2, Trash2, X } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -10,6 +10,10 @@ import { coords, getPosition, mapsLink } from '../lib/geo'
 import { phonesOf, shareText, smsLink, tripText } from '../lib/messages'
 import { cloudEnabled } from '../lib/supabase'
 import ActiveTripActions from '../components/ActiveTripActions'
+import MapView from '../components/MapView'
+import { ensureTripRoute } from '../lib/routing'
+import { fmtKm } from '../lib/poi'
+import { useOnline } from '../lib/hooks'
 
 export const STATUS: Record<TripStatus, { label: string; tone: 'stone' | 'green' | 'orange' | 'red' | 'blue' }> = {
   planned: { label: 'Prévu', tone: 'blue' },
@@ -62,7 +66,7 @@ export function TripsList() {
 }
 
 export function TripNew() {
-  const { state, upsertTrip } = useStore()
+  const { state, upsertTrip, patchTrip } = useStore()
   const nav = useNavigate()
   const now = new Date()
   const [f, setF] = useState({
@@ -95,6 +99,7 @@ export function TripNew() {
       updatedAt: new Date().toISOString(),
     }
     upsertTrip(t)
+    ensureTripRoute(t, patchTrip)
     if (start && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission()
     nav(`/trajets/${t.id}${start ? '?partage=1' : ''}`, { replace: true })
   }
@@ -202,9 +207,14 @@ export function TripNew() {
 
 export function TripDetail() {
   const { id } = useParams()
-  const { state, upsertTrip, removeTrip, setLastPosition } = useStore()
+  const { state, upsertTrip, removeTrip, patchTrip, setLastPosition } = useStore()
   const nav = useNavigate()
+  const online = useOnline()
   const trip = state.trips.find((t) => t.id === id)
+  useEffect(() => {
+    if (trip && (!trip.route || (trip.route.source === 'direct' && online))) ensureTripRoute(trip, patchTrip)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trip?.id, online])
   const contacts = useMemo(() => state.contacts.filter((c) => trip?.contactIds.includes(c.id)), [state.contacts, trip])
   const [shareMsg, setShareMsg] = useState('')
   if (!trip) return <Empty icon={<Route size={36} />} title="Trajet introuvable" action={<ButtonLink to="/trajets">Retour</ButtonLink>} />
@@ -227,6 +237,31 @@ export function TripDetail() {
   return (
     <div className="space-y-4">
       <PageHeader title={`${trip.from} → ${trip.to}`} subtitle={`${fmtDateTime(trip.departureAt)} — arrivée ${fmtTime(trip.etaAt)}`} back="/trajets" action={<Badge tone={STATUS[trip.status].tone}>{STATUS[trip.status].label}</Badge>} />
+
+      <div className="relative h-60 overflow-hidden rounded-[28px] ring-1 ring-white/10" data-testid="carte-trajet">
+        <MapView
+          styleKey={(state.settings.mapStyle ?? 'nuit') as 'nuit'}
+          me={live ? state.lastPosition : undefined}
+          lines={[
+            ...(trip.route ? [{ id: 'route', coords: trip.route.coords, color: '#E05206', width: 5, dashed: trip.route.source === 'direct' }] : []),
+            ...(trip.positions.length > 1 ? [{ id: 'trace', coords: trip.positions.map((p) => [p.lng, p.lat] as [number, number]), color: '#60a5fa', width: 3 }] : []),
+          ]}
+          points={[
+            ...(trip.fromCoord ? [{ id: 'depart', ...trip.fromCoord, color: '#22c55e', label: trip.from }] : []),
+            ...(trip.toCoord ? [{ id: 'arrivee', ...trip.toCoord, color: '#E05206', label: trip.to }] : []),
+          ]}
+          center={trip.fromCoord}
+          zoom={7}
+          fitKey={trip.route ? trip.id + trip.route.source + trip.positions.length : undefined}
+          fitTo={[...(trip.route?.coords ?? []), ...trip.positions.map((p) => [p.lng, p.lat] as [number, number])]}
+        />
+        {trip.route && (
+          <span className="glass absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold">
+            {fmtKm(trip.route.km)}
+            {trip.route.minutes ? ` · ≈ ${Math.floor(trip.route.minutes / 60)} h ${String(trip.route.minutes % 60).padStart(2, '0')} de route` : ' · à vol d’oiseau'}
+          </span>
+        )}
+      </div>
 
       {live && (
         <Card>

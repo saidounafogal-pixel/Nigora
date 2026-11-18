@@ -3,11 +3,11 @@ import { CheckCircle2, Flag, MessageSquareWarning } from 'lucide-react'
 import type { Trip } from '../lib/types'
 import { useStore } from '../lib/store'
 import { getPosition } from '../lib/geo'
-import { arrivalText, overdueText, phonesOf, smsLink } from '../lib/messages'
+import { arrivalText, openExternal, overdueText, phonesOf, smsLink } from '../lib/messages'
 import { Button } from './ui'
 
 export default function ActiveTripActions({ trip }: { trip: Trip }) {
-  const { state, upsertTrip, setLastPosition } = useStore()
+  const { state, patchTrip, setLastPosition } = useStore()
   const [busy, setBusy] = useState(false)
   const contacts = state.contacts.filter((c) => trip.contactIds.includes(c.id))
   const phones = phonesOf(contacts)
@@ -26,24 +26,22 @@ export default function ActiveTripActions({ trip }: { trip: Trip }) {
   async function arrived() {
     setBusy(true)
     const p = await pos()
-    upsertTrip({
-      ...trip,
+    patchTrip(trip.id, (t) => ({
       status: 'arrived',
-      positions: p ? [...trip.positions, p].slice(-200) : trip.positions,
-      checkins: [...trip.checkins, { at: new Date().toISOString(), label: `Arrivé·e à ${trip.to}`, position: p }],
-    })
+      positions: p ? [...t.positions, p].slice(-200) : t.positions,
+      checkins: [...t.checkins, { at: new Date().toISOString(), label: `Arrivé·e à ${t.to}`, position: p }],
+    }))
     setBusy(false)
-    if (phones.length) window.location.href = smsLink(phones, arrivalText(trip, name))
+    if (phones.length) openExternal(smsLink(phones, arrivalText(trip, name)))
   }
 
   async function checkin() {
     setBusy(true)
     const p = await pos()
-    upsertTrip({
-      ...trip,
-      positions: p ? [...trip.positions, p].slice(-200) : trip.positions,
-      checkins: [...trip.checkins, { at: new Date().toISOString(), label: 'Point d’étape — tout va bien', position: p }],
-    })
+    patchTrip(trip.id, (t) => ({
+      positions: p ? [...t.positions, p].slice(-200) : t.positions,
+      checkins: [...t.checkins, { at: new Date().toISOString(), label: 'Point d’étape — tout va bien', position: p }],
+    }))
     setBusy(false)
   }
 

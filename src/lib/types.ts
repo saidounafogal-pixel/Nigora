@@ -33,6 +33,9 @@ export type Trip = {
   positions: Position[]
   checkins: { at: string; label: string; position?: Position }[]
   shareToken?: string
+  fromCoord?: { lat: number; lng: number }
+  toCoord?: { lat: number; lng: number }
+  route?: { coords: [number, number][]; km: number; minutes?: number; source: 'osrm' | 'direct' }
   createdAt: string
   updatedAt: string
 }
@@ -83,6 +86,8 @@ export type Settings = {
   sosCountdownSec: number
   lowDataMode: boolean
   orgCode?: string
+  mapStyle?: 'nuit' | 'satellite' | 'plan' | 'relief'
+  mapCats?: string[]
 }
 
 export type AppState = {
@@ -93,4 +98,5 @@ export type AppState = {
   lastPosition?: Position
   queue: SyncItem[]
   settings: Settings
+  savedAt?: number
 }

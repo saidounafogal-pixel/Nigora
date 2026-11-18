@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Home, Route, HeartPulse, Menu, CloudOff, RefreshCw } from 'lucide-react'
+import { Home, Route, Map as MapIcon, Menu, CloudOff, RefreshCw } from 'lucide-react'
 import { useOnline } from '../lib/hooks'
 import { useStore } from '../lib/store'
 import { cloudEnabled } from '../lib/supabase'
@@ -7,9 +7,9 @@ import { cx } from '../lib/utils'
 
 const tabs = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
-  { to: '/trajets', label: 'Trajets', icon: Route },
+  { to: '/carte', label: 'Carte', icon: MapIcon },
   { to: '/sos', label: 'SOS', icon: null },
-  { to: '/medical', label: 'Médical', icon: HeartPulse },
+  { to: '/trajets', label: 'Trajets', icon: Route },
   { to: '/plus', label: 'Plus', icon: Menu },
 ]
 

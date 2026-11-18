@@ -35,6 +35,7 @@ type Ctx = {
   removeContact: (id: string) => void
   upsertTrip: (t: Trip) => void
   removeTrip: (id: string) => void
+  patchTrip: (id: string, patch: Partial<Trip> | ((t: Trip) => Partial<Trip>)) => void
   saveMedical: (m: MedicalProfile) => void
   addAlert: (a: SosAlert) => void
   updateAlert: (id: string, patch: Partial<SosAlert>) => void
@@ -51,6 +52,7 @@ const StoreCtx = createContext<Ctx | null>(null)
 function backup(s: AppState) {
   try {
     localStorage.setItem(KEY, JSON.stringify(s))
+    localStorage.setItem(KEY + ':at', String(s.savedAt ?? 0))
   } catch {
     /* quota ou mode privé */
   }
@@ -63,20 +65,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     ;(async () => {
-      let loaded: AppState | undefined
+      // Deux copies : IndexedDB (principale) et localStorage (synchrone). On garde la plus récente,
+      // car une écriture IndexedDB peut ne pas être terminée si l'application est fermée brutalement.
+      let fromIdb: AppState | undefined
+      let fromLs: AppState | undefined
       try {
-        loaded = await get<AppState>(KEY)
+        fromIdb = await get<AppState>(KEY)
       } catch {
         /* ignore */
       }
-      if (!loaded) {
-        try {
-          const raw = localStorage.getItem(KEY)
-          if (raw) loaded = JSON.parse(raw)
-        } catch {
-          /* ignore */
-        }
+      try {
+        const raw = localStorage.getItem(KEY)
+        if (raw) fromLs = JSON.parse(raw)
+      } catch {
+        /* ignore */
       }
+      const loaded = (fromLs?.savedAt ?? 0) > (fromIdb?.savedAt ?? 0) ? fromLs : (fromIdb ?? fromLs)
       if (loaded) setState({ ...initial, ...loaded, settings: { ...initial.settings, ...loaded.settings }, medical: { ...emptyMedical, ...loaded.medical } })
       setReady(true)
     })()
@@ -88,8 +92,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       first.current = false
       return
     }
-    set(KEY, state).catch(() => undefined)
-    backup(state)
+    const stamped = { ...state, savedAt: Date.now() }
+    backup(stamped)
+    set(KEY, stamped).catch(() => undefined)
   }, [state, ready])
 
   const enqueueInto = (s: AppState, item: Omit<SyncItem, 'id' | 'queuedAt' | 'attempts'>): AppState => ({
@@ -124,6 +129,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const patchTrip = useCallback((id: string, patch: Partial<Trip> | ((t: Trip) => Partial<Trip>)) => {
+    setState((s) => {
+      const cur = s.trips.find((x) => x.id === id)
+      if (!cur) return s
+      const trip = { ...cur, ...(typeof patch === 'function' ? patch(cur) : patch), updatedAt: new Date().toISOString() }
+      return enqueueInto({ ...s, trips: s.trips.map((x) => (x.id === id ? trip : x)) }, { table: 'trips', op: 'upsert', payload: trip as unknown as Record<string, unknown> })
+    })
+  }, [])
+
   const removeTrip = useCallback((id: string) => {
     setState((s) => enqueueInto({ ...s, trips: s.trips.filter((x) => x.id !== id) }, { table: 'trips', op: 'delete', payload: { id } }))
   }, [])
@@ -153,7 +167,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   return (
     <StoreCtx.Provider
-      value={{ state, ready, upsertContact, removeContact, upsertTrip, removeTrip, saveMedical, addAlert, updateAlert, setLastPosition, enqueue, setQueue, updateSettings, resetAll }}
+      value={{ state, ready, upsertContact, removeContact, upsertTrip, removeTrip, patchTrip, saveMedical, addAlert, updateAlert, setLastPosition, enqueue, setQueue, updateSettings, resetAll }}
     >
       {children}
     </StoreCtx.Provider>

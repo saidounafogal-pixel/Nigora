@@ -161,10 +161,10 @@ function LiveTripCard({ trip, contactsCount }: { trip: Trip; contactsCount: numb
       <div className="relative h-[300px] overflow-hidden rounded-[32px]" style={{ background: overdue ? 'radial-gradient(120% 80% at 70% 0%, #ff8a8a 0%, #c81e1e 35%, #3a0606 75%, #0a0202 100%)' : SCENES[0] }}>
         <Dunes />
         <div className="glass absolute left-3 right-3 top-3 flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-1.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-[11px] font-black">{(trip.company ?? trip.transport)[0].toUpperCase()}</span>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-[11px] font-black">{(trip.company || trip.transport || '?')[0].toUpperCase()}</span>
           <span className="min-w-0 flex-1 leading-tight">
-            <span className="block truncate text-sm font-semibold">{trip.company ?? 'Trajet personnel'}</span>
-            <span className="block text-[10px] uppercase tracking-wider text-white/60">{trip.vehiclePlate ?? trip.transport}</span>
+            <span className="block truncate text-sm font-semibold">{trip.company || 'Trajet personnel'}</span>
+            <span className="block text-[10px] uppercase tracking-wider text-white/60">{trip.vehiclePlate || trip.transport}</span>
           </span>
           <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${trip.tracking ? 'bg-amber-300/90 text-black' : 'bg-white/15'}`}>{trip.tracking ? 'Suivi actif' : 'Sans suivi'}</span>
         </div>

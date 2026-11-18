@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Building2, ChevronRight, CloudOff, History, Hospital, Phone, QrCode, UserCircle, Users } from 'lucide-react'
+import { Building2, ChevronRight, CloudOff, HeartPulse, History, Hospital, Phone, QrCode, UserCircle, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useStore } from '../lib/store'
 
@@ -9,6 +9,7 @@ export default function More() {
     <div className="space-y-5">
       <h1 className="text-[34px] font-bold leading-none tracking-tight">Plus</h1>
       <Group title="Ma sécurité">
+        <Item to="/medical" icon={<HeartPulse />} label="Profil médical d’urgence" />
         <Item to="/contacts" icon={<Users />} label="Contacts de confiance" meta={String(state.contacts.length)} />
         <Item to="/fiche" icon={<QrCode />} label="Fiche d’urgence (QR)" />
         <Item to="/alertes" icon={<History />} label="Historique des alertes" meta={String(state.alerts.length)} />

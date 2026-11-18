@@ -5,7 +5,7 @@ import { useMemberships, useSession } from '../lib/auth'
 import { DEMO_ALERTS, type OrgAlert } from '../data/demo'
 import type { AlertStatus } from '../lib/types'
 import { Card } from '../components/ui'
-import { AlertRow, Kpi, WideShell } from './Pro'
+import { AlertRow, Kpi, OpsMap, WideShell } from './Pro'
 
 /**
  * Console des partenaires (autorités, sapeurs-pompiers, hôpitaux).
@@ -60,6 +60,7 @@ export default function Partners() {
         <Kpi icon={<Clock size={20} />} label="En cours" value={open.filter((a) => a.status === 'in_progress').length} tone="bg-amber-500/15 text-amber-400" />
         <Kpi icon={<CheckCircle2 size={20} />} label="Clôturées" value={alerts.filter((a) => a.status === 'closed').length} tone="bg-emerald-500/15 text-emerald-400" />
       </div>
+      <OpsMap alerts={alerts} />
       <div className="mb-3 flex gap-2">
         {(['open', 'all'] as const).map((f) => (
           <button key={f} onClick={() => setFilter(f)} className={`rounded-full px-4 py-2 text-sm font-semibold ${filter === f ? 'bg-white text-black' : 'bg-white/[0.06] text-white/75 ring-1 ring-white/10'}`}>

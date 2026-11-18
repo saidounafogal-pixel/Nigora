@@ -87,3 +87,10 @@ export function medicalQrText(m: MedicalProfile) {
     .filter(Boolean)
     .join('\n')
 }
+
+/** Ouvre l'application SMS / téléphone (point d'entrée unique, interceptable par les tests) */
+export function openExternal(url: string) {
+  const hook = (window as unknown as { __nigoraOpenExternal?: (u: string) => void }).__nigoraOpenExternal
+  if (hook) hook(url)
+  else window.location.href = url
+}

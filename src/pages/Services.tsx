@@ -5,10 +5,13 @@ import { BASE_SERVICES, CATEGORY_LABEL, type Service } from '../data/services'
 import { supabase } from '../lib/supabase'
 import { searchMapsLink } from '../lib/geo'
 import { Badge, Card, Input, PageHeader } from '../components/ui'
+import Nearby from '../components/Nearby'
+import { useStore } from '../lib/store'
 
 const CACHE = 'nigora-services-cache'
 
 export default function Services() {
+  const { state } = useStore()
   const [extra, setExtra] = useState<Service[]>([])
   const [q, setQ] = useState('')
   const [cat, setCat] = useState<Service['category'] | 'all'>('all')
@@ -43,6 +46,7 @@ export default function Services() {
   return (
     <div className="space-y-4">
       <PageHeader title="Services d’assistance" subtitle="Disponible hors connexion" back="/plus" />
+      <Nearby pos={state.lastPosition} cats={['sante', 'pharmacie', 'pompiers', 'police', 'eau', 'carburant', 'garage']} limit={6} title="Autour de moi" />
       <div className="relative">
         <Search className="absolute left-3 top-3 text-white/40" size={18} />
         <Input className="pl-10" placeholder="Ville, hôpital…" value={q} onChange={(e) => setQ(e.target.value)} />

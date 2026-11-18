@@ -15,6 +15,8 @@ import Account from './pages/Account'
 import Pro from './pages/Pro'
 import Partners from './pages/Partners'
 import SharedTrip from './pages/SharedTrip'
+import MapPage from './pages/MapPage'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function Shell() {
   const { ready } = useStore()
@@ -27,6 +29,7 @@ function Shell() {
         <Route element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="sos" element={<Sos />} />
+          <Route path="carte" element={<MapPage />} />
           <Route path="trajets" element={<TripsList />} />
           <Route path="trajets/nouveau" element={<TripNew />} />
           <Route path="trajets/:id" element={<TripDetail />} />
@@ -50,10 +53,12 @@ function Shell() {
 
 export default function App() {
   return (
-    <StoreProvider>
-      <BrowserRouter>
-        <Shell />
-      </BrowserRouter>
-    </StoreProvider>
+    <ErrorBoundary>
+      <StoreProvider>
+        <BrowserRouter>
+          <Shell />
+        </BrowserRouter>
+      </StoreProvider>
+    </ErrorBoundary>
   )
 }

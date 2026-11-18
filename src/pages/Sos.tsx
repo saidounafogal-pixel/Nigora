@@ -4,12 +4,13 @@ import { CheckCircle2, MapPin, MessageCircle, MessageSquare, Phone, QrCode, Shie
 import { useStore } from '../lib/store'
 import type { Position, SosAlert } from '../lib/types'
 import { getPosition, coords, mapsLink } from '../lib/geo'
-import { phonesOf, smsLink, sosText, whatsappLink } from '../lib/messages'
+import { openExternal, phonesOf, smsLink, sosText, whatsappLink } from '../lib/messages'
 import { fmtTime, timeAgo, uid } from '../lib/utils'
 import { useOnline } from '../lib/hooks'
 import { cloudEnabled } from '../lib/supabase'
 import { Button, Card, Toggle } from '../components/ui'
 import { BASE_SERVICES } from '../data/services'
+import Nearby from '../components/Nearby'
 
 const KINDS: { v: SosAlert['kind']; l: string; e: string }[] = [
   { v: 'accident', l: 'Accident', e: '🚗' },
@@ -94,7 +95,7 @@ export default function Sos() {
     const phones = phonesOf(sosContacts)
     if (phones.length) {
       setTimeout(() => {
-        window.location.href = smsLink(phones, sosText(a, state.medical.fullName, state.medical, activeTrip))
+        openExternal(smsLink(phones, sosText(a, state.medical.fullName, state.medical, activeTrip)))
       }, 300)
     }
   }
@@ -175,6 +176,8 @@ export default function Sos() {
             </div>
           </div>
         </Card>
+
+        <Nearby pos={alert.position} cats={['sante', 'pompiers', 'police']} title="Secours et soins les plus proches" />
 
         <Link to="/fiche" className="glass flex items-center gap-3 rounded-[28px] p-4">
           <QrCode className="text-red-600" />

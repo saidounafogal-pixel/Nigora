@@ -1,0 +1,18 @@
+{
+  "elements": [
+    { "type": "node", "id": 1, "lat": 13.5205, "lon": 2.1110, "tags": { "amenity": "hospital", "name": "Hôpital National de Niamey", "emergency": "yes", "phone": "+227 20 72 22 53" } },
+    { "type": "way", "id": 2, "center": { "lat": 13.5140, "lon": 2.1290 }, "tags": { "amenity": "clinic", "name": "Clinique Gamkalé" } },
+    { "type": "node", "id": 3, "lat": 13.5090, "lon": 2.1180, "tags": { "amenity": "pharmacy", "name": "Pharmacie du Plateau" } },
+    { "type": "node", "id": 4, "lat": 13.5300, "lon": 2.1400, "tags": { "man_made": "water_well", "drinking_water": "yes", "pump": "manual" } },
+    { "type": "node", "id": 5, "lat": 13.4980, "lon": 2.1500, "tags": { "man_made": "borehole" } },
+    { "type": "node", "id": 6, "lat": 13.5250, "lon": 2.0950, "tags": { "amenity": "drinking_water", "name": "Borne fontaine Yantala" } },
+    { "type": "node", "id": 7, "lat": 13.5160, "lon": 2.1050, "tags": { "amenity": "fuel", "brand": "Total" } },
+    { "type": "node", "id": 8, "lat": 13.5120, "lon": 2.1230, "tags": { "amenity": "police", "name": "Commissariat Central" } },
+    { "type": "node", "id": 9, "lat": 13.5060, "lon": 2.1080, "tags": { "amenity": "fire_station", "name": "Caserne des sapeurs-pompiers" } },
+    { "type": "node", "id": 10, "lat": 13.5350, "lon": 2.1450, "tags": { "shop": "car_repair", "name": "Garage Moussa" } },
+    { "type": "node", "id": 11, "lat": 13.5225, "lon": 2.1340, "tags": { "amenity": "bus_station", "name": "Gare routière de Wadata" } },
+    { "type": "node", "id": 12, "lat": 13.5100, "lon": 2.1150, "tags": { "tourism": "hotel", "name": "Hôtel Terminus" } },
+    { "type": "node", "id": 13, "lat": 13.5000, "lon": 2.1000, "tags": { "amenity": "bench" } },
+    { "type": "relation", "id": 14, "tags": { "amenity": "hospital" } }
+  ]
+}

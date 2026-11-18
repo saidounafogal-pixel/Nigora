@@ -5,7 +5,7 @@ type Row = Record<string, unknown>
 const s = (v: unknown) => (v === '' || v === undefined ? null : v)
 
 /** Conversion des objets locaux (camelCase) vers les colonnes Postgres (snake_case) */
-function toRows(item: SyncItem, userId: string): { table: string; rows: Row[]; conflict?: string; extra?: { table: string; rows: Row[]; conflict: string } } {
+export function toRows(item: SyncItem, userId: string): { table: string; rows: Row[]; conflict?: string; extra?: { table: string; rows: Row[]; conflict: string } } {
   const p = item.payload as Row
   switch (item.table) {
     case 'trusted_contacts':
