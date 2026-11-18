@@ -38,19 +38,26 @@ npm run dev        # http://localhost:5173
 npm run build      # production dans dist/
 ```
 
-Sans configuration, NIGORA tourne en **mode local** : toutes les fonctions voyageur sont actives, et les espaces entreprise / partenaires s’affichent avec des données de démonstration.
+En développement (`npm run dev`), sans fichier `.env`, NIGORA tourne en **mode local** : fonctions voyageur actives, espaces entreprise / partenaires en démonstration. La version de production (`npm run build`) est reliée au serveur Supabase.
 
-## Activer le serveur (Supabase)
+## Serveur (Supabase)
 
-1. Créer un projet Supabase.
-2. Exécuter `supabase/migrations/20261118000000_init.sql` (SQL Editor ou `supabase db push`).
-3. Copier `.env.example` en `.env` et renseigner `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`.
-4. Donner l’accès partenaire à un compte (après son inscription) :
-   ```sql
-   insert into partners (name, kind, region) values ('SAMU Niamey', 'secours', 'Niamey') returning id;
-   insert into partner_members (partner_id, user_id) values ('<id partenaire>', '<id utilisateur>');
-   ```
-5. Valider les coordonnées des établissements dans la table `service_directory` (`verified = true`) au fil du pilote.
+Le serveur est **déjà en place** : projet Supabase « NIGORA » (région Paris, offre gratuite), relié à l’application par `.env.production`.
+
+- Schéma, règles d’accès et fonctions : `supabase/migrations/` (3 migrations appliquées).
+- Testé directement sur le projet : une entreprise ne voit jamais le profil médical ; un partenaire ne le voit qu’avec le consentement du voyageur ; un inconnu ne voit rien ; un voyageur ne peut ni usurper un autre compte ni ajouter de véhicule ; une resynchronisation tardive n’annule pas une prise en charge.
+
+**À régler après la mise en ligne du site** (Tableau de bord Supabase → Authentication → URL Configuration) : remplacer *Site URL* par l’adresse du site (sinon les e-mails de confirmation renvoient vers `localhost`).
+
+Donner l’accès partenaire à un compte (après son inscription), dans le SQL Editor :
+```sql
+insert into partners (name, kind, region) values ('SAMU Niamey', 'secours', 'Niamey') returning id;
+insert into partner_members (partner_id, user_id) values ('<id partenaire>', (select id from auth.users where email = '<e-mail>'));
+```
+
+Valider les coordonnées des établissements dans la table `service_directory` (`verified = true`) au fil du pilote.
+
+Pour utiliser un autre projet Supabase : appliquer les migrations dans l’ordre, puis remplacer l’URL et la clé dans `.env.production`.
 
 ### SMS envoyés par le serveur (facultatif)
 
@@ -58,7 +65,7 @@ Le SMS part d’abord du téléphone (fonctionne sans Internet). En complément,
 
 ```bash
 supabase functions deploy notify-alert --no-verify-jwt
-supabase secrets set SMS_PROVIDER=africastalking AT_USERNAME=... AT_API_KEY=... WEBHOOK_SECRET=...
+supabase secrets set SMS_PROVIDER=africastalking AT_USERNAME=... AT_API_KEY=... WEBHOOK_SECRET=<secret long et aléatoire>
 ```
 
 Puis créer un **Database Webhook** (table `alerts`, événement `INSERT`) vers cette fonction avec l’en-tête `x-webhook-secret`. Twilio est aussi pris en charge (`SMS_PROVIDER=twilio`).

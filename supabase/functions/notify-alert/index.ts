@@ -34,8 +34,9 @@ async function sendSms(to: string[], message: string) {
 }
 
 Deno.serve(async (req) => {
+  // Secret obligatoire : sans lui, n'importe qui pourrait déclencher des SMS
   const secret = Deno.env.get('WEBHOOK_SECRET')
-  if (secret && req.headers.get('x-webhook-secret') !== secret) return new Response('Unauthorized', { status: 401 })
+  if (!secret || req.headers.get('x-webhook-secret') !== secret) return new Response('Unauthorized', { status: 401 })
 
   const { record } = await req.json()
   if (!record?.id || !record?.user_id) return new Response('Bad request', { status: 400 })
