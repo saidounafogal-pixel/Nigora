@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { get, set } from 'idb-keyval'
 import type { AppState, Contact, MedicalProfile, Position, SosAlert, SyncItem, Trip } from './types'
 import { uid } from './utils'
+import { DEMO, demoState } from './demo'
 
 const KEY = 'nigora-state-v1'
 
@@ -80,7 +81,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       } catch {
         /* ignore */
       }
-      const loaded = (fromLs?.savedAt ?? 0) > (fromIdb?.savedAt ?? 0) ? fromLs : (fromIdb ?? fromLs)
+      let loaded = (fromLs?.savedAt ?? 0) > (fromIdb?.savedAt ?? 0) ? fromLs : (fromIdb ?? fromLs)
+      if (DEMO && !loaded) loaded = demoState()
       if (loaded) setState({ ...initial, ...loaded, settings: { ...initial.settings, ...loaded.settings }, medical: { ...emptyMedical, ...loaded.medical } })
       setReady(true)
     })()
@@ -163,7 +165,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const enqueue = useCallback((item: Omit<SyncItem, 'id' | 'queuedAt' | 'attempts'>) => setState((s) => enqueueInto(s, item)), [])
   const setQueue = useCallback((queue: SyncItem[]) => setState((s) => ({ ...s, queue })), [])
   const updateSettings = useCallback((patch: Partial<AppState['settings']>) => setState((s) => ({ ...s, settings: { ...s.settings, ...patch } })), [])
-  const resetAll = useCallback(() => setState({ ...initial, settings: { ...initial.settings, onboarded: true } }), [])
+  const resetAll = useCallback(() => setState(DEMO ? demoState() : { ...initial, settings: { ...initial.settings, onboarded: true } }), [])
 
   return (
     <StoreCtx.Provider

@@ -21,7 +21,7 @@ export function WideShell({ title, subtitle, children, demo }: { title: string; 
           <Link to="/plus" className="rounded-lg p-1 text-white/50 hover:bg-white/10" aria-label="Retour">
             <ChevronLeft />
           </Link>
-          <img src="/favicon.svg" className="h-7 w-7" alt="" />
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} className="h-7 w-7" alt="" />
           <div className="flex-1">
             <p className="font-bold leading-tight text-white">{title}</p>
             {subtitle && <p className="text-xs text-white/50">{subtitle}</p>}

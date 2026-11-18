@@ -214,3 +214,38 @@ export const offlineStyle: StyleSpecification = {
   sources: {},
   layers: [{ id: 'fond', type: 'background', paint: { 'background-color': '#0b0e12' } }],
 }
+
+// ---------- Fonds de démonstration (aperçu privé sans réseau) ----------
+import { CITIES } from '../data/places'
+import { DEMO_RIVER, DEMO_ROADS } from './demo'
+
+function demoStyle(name: string, pal: { bg: string; road: string; roadHalo: string; river: string; city: string; dot: string; grid?: string }): StyleSpecification {
+  return {
+    version: 8,
+    name,
+    sources: {
+      routes: { type: 'geojson', data: { type: 'FeatureCollection', features: DEMO_ROADS.map((r) => ({ type: 'Feature', properties: { ref: r.name }, geometry: { type: 'LineString', coordinates: r.coords } })) } },
+      fleuve: { type: 'geojson', data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: DEMO_RIVER } } },
+      villes: {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: CITIES.map((c) => ({ type: 'Feature', properties: { lbl: 'lbl-' + c.name, chef: c.name === c.region ? 1 : 0 }, geometry: { type: 'Point', coordinates: [c.lng, c.lat] } })) },
+      },
+    },
+    layers: [
+      { id: 'fond', type: 'background', paint: { 'background-color': pal.bg } },
+      { id: 'fleuve-halo', type: 'line', source: 'fleuve', paint: { 'line-color': pal.river, 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 4, 12, 18], 'line-opacity': 0.25, 'line-blur': 3 } },
+      { id: 'fleuve', type: 'line', source: 'fleuve', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': pal.river, 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1.5, 12, 7] } },
+      { id: 'routes-halo', type: 'line', source: 'routes', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': pal.roadHalo, 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 4, 14, 16], 'line-opacity': 0.25, 'line-blur': 2 } },
+      { id: 'routes', type: 'line', source: 'routes', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': pal.road, 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1, 14, 6] } },
+      { id: 'villes-points', type: 'circle', source: 'villes', paint: { 'circle-radius': ['case', ['==', ['get', 'chef'], 1], 4, 2.5], 'circle-color': pal.dot, 'circle-stroke-color': pal.bg, 'circle-stroke-width': 1 } },
+      { id: 'villes-noms', type: 'symbol', source: 'villes', layout: { 'icon-image': ['get', 'lbl'], 'icon-anchor': 'top', 'icon-offset': [0, 6], 'icon-optional': false }, paint: { 'icon-opacity': ['case', ['==', ['get', 'chef'], 1], 1, 0.8] } },
+    ],
+  }
+}
+
+export const DEMO_STYLES: Record<MapStyleKey, { label: string; style: StyleSpecification; dark: boolean }> = {
+  nuit: { label: 'Nuit', dark: true, style: demoStyle('Nuit (aperçu)', { bg: '#07090c', road: '#E05206', roadHalo: '#E05206', river: '#2aa7d6', city: '#fff', dot: '#f5f5f5' }) },
+  satellite: { label: 'Satellite', dark: true, style: demoStyle('Satellite (aperçu)', { bg: '#5c4a32', road: '#f1e6c8', roadHalo: '#000', river: '#1f5f7a', city: '#fff', dot: '#fff' }) },
+  plan: { label: 'Plan', dark: false, style: demoStyle('Plan (aperçu)', { bg: '#f2efe9', road: '#f4a261', roadHalo: '#b45309', river: '#7cc4e8', city: '#111', dot: '#333' }) },
+  relief: { label: 'Relief', dark: false, style: demoStyle('Relief (aperçu)', { bg: '#e8dcc0', road: '#c2410c', roadHalo: '#7c2d12', river: '#4a90b8', city: '#111', dot: '#333' }) },
+}

@@ -26,7 +26,7 @@ export default function SharedTrip() {
   return (
     <div className="mx-auto max-w-md space-y-4 p-4">
       <div className="flex items-center gap-2">
-        <img src="/favicon.svg" className="h-8 w-8" alt="" />
+        <img src={`${import.meta.env.BASE_URL}favicon.svg`} className="h-8 w-8" alt="" />
         <span className="text-lg font-extrabold">NIGORA · Suivi de trajet</span>
       </div>
       {trip === undefined && <p className="text-sm text-white/50">Chargement…</p>}

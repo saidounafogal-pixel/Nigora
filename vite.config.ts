@@ -2,10 +2,13 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  // Aperçu privé : chemins relatifs, pas de service worker
+  base: mode === 'demo' ? './' : '/',
+  build: mode === 'demo' ? { outDir: 'dist-demo' } : undefined,
   plugins: [
     react(),
-    VitePWA({
+    mode !== 'demo' && VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
@@ -49,4 +52,4 @@ export default defineConfig({
       },
     }),
   ],
-})
+}))

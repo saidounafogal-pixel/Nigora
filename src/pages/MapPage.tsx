@@ -10,6 +10,7 @@ import { getPosition, mapsLink } from '../lib/geo'
 import { prefetchArea } from '../lib/offlineMap'
 import { phonesOf, smsLink } from '../lib/messages'
 import { cx } from '../lib/utils'
+import { DEMO } from '../lib/demo'
 
 export const MIN_POI_ZOOM = 9
 const DEFAULT_CATS: PoiCategory[] = ['sante', 'pharmacie', 'eau', 'carburant', 'police', 'pompiers', 'garage', 'transport']
@@ -150,7 +151,7 @@ export default function MapPage() {
         <div className="flex items-center gap-2">
           <span className="glass pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] text-white/80" data-testid="statut-carte">
             {status.loading ? <Loader2 size={12} className="animate-spin" /> : <span className={cx('h-1.5 w-1.5 rounded-full', online ? 'bg-emerald-400' : 'bg-amber-400')} />}
-            {status.loading ? 'Chargement des infrastructures…' : status.note ?? `${pois.filter((p) => cats.includes(p.cat)).length} infrastructures · OpenStreetMap`}
+            {status.loading ? 'Chargement des infrastructures…' : status.note ?? `${pois.filter((p) => cats.includes(p.cat)).length} infrastructures · ${DEMO ? 'données d’exemple' : 'OpenStreetMap'}`}
           </span>
         </div>
       </div>

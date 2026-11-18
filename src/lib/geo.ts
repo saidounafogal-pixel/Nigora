@@ -1,6 +1,8 @@
 import type { Position } from './types'
+import { DEMO, DEMO_POSITION } from './demo'
 
 export function getPosition(timeoutMs = 12000, highAccuracy = true): Promise<Position> {
+  if (DEMO) return Promise.resolve({ ...DEMO_POSITION, at: new Date().toISOString() })
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) return reject(new Error('Géolocalisation indisponible sur cet appareil'))
     navigator.geolocation.getCurrentPosition(

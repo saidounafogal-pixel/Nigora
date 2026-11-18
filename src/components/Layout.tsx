@@ -4,6 +4,7 @@ import { useOnline } from '../lib/hooks'
 import { useStore } from '../lib/store'
 import { cloudEnabled } from '../lib/supabase'
 import { cx } from '../lib/utils'
+import { DEMO } from '../lib/demo'
 
 const tabs = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
@@ -17,7 +18,7 @@ export function Logo({ size = 32 }: { size?: number }) {
   return (
     <span className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <span className="absolute inset-0 rounded-[30%] bg-gradient-to-br from-amber-300 via-brand to-fuchsia-600 blur-[6px] opacity-70" />
-      <img src="/favicon.svg" alt="" className="relative h-full w-full" />
+      <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="relative h-full w-full" />
     </span>
   )
 }
@@ -42,7 +43,11 @@ export default function Layout() {
               <RefreshCw size={12} /> {state.queue.length}
             </span>
           )}
-          {online ? (
+          {DEMO ? (
+            <span className="rounded-full bg-amber-300 px-2.5 py-1 font-bold text-black" title="Aperçu concepteur : données fictives, aucune connexion">
+              Aperçu
+            </span>
+          ) : online ? (
             <span className="glass flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold text-white/80">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400" /> En ligne
             </span>

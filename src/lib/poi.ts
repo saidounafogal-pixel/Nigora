@@ -1,5 +1,6 @@
 import { get, set } from 'idb-keyval'
 import { distanceKm } from './geo'
+import { DEMO, DEMO_POIS } from './demo'
 
 export type PoiCategory = 'sante' | 'pharmacie' | 'eau' | 'carburant' | 'police' | 'pompiers' | 'garage' | 'transport' | 'hebergement'
 
@@ -141,6 +142,10 @@ export type PoiLoad = { pois: Poi[]; fromCache: number; fetched: number; failed:
  * Limité à 12 cellules (≈ 3° × 2°) par appel pour rester raisonnable.
  */
 export async function loadPois(b: BBox, opts: { force?: boolean; signal?: AbortSignal; online?: boolean } = {}): Promise<PoiLoad> {
+  if (DEMO) {
+    const m = 0.3
+    return { pois: DEMO_POIS.filter((p) => p.lat >= b.south - m && p.lat <= b.north + m && p.lng >= b.west - m && p.lng <= b.east + m), fromCache: 1, fetched: 0, failed: 0 }
+  }
   const cells = cellsFor(b).slice(0, 12)
   const online = opts.online ?? navigator.onLine
   const res: PoiLoad = { pois: [], fromCache: 0, fetched: 0, failed: 0 }
@@ -184,6 +189,7 @@ export async function loadPois(b: BBox, opts: { force?: boolean; signal?: AbortS
 
 /** Tous les points déjà en cache (utile hors ligne, après un SOS) */
 export async function cachedPoisAround(pos: { lat: number; lng: number }, radiusDeg = 1): Promise<Poi[]> {
+  if (DEMO) return DEMO_POIS
   const out: Poi[] = []
   for (const c of cellsFor({ south: pos.lat - radiusDeg, north: pos.lat + radiusDeg, west: pos.lng - radiusDeg, east: pos.lng + radiusDeg })) {
     const hit = await get<CacheEntry>(c.key).catch(() => undefined)

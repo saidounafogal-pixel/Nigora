@@ -3,7 +3,10 @@ import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MLMap } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
-import { STYLES, FONT_BOLD, offlineStyle, type MapStyleKey } from '../lib/mapStyles'
+import { STYLES as LIVE_STYLES, DEMO_STYLES, FONT_BOLD, offlineStyle, type MapStyleKey } from '../lib/mapStyles'
+import { DEMO } from '../lib/demo'
+
+const STYLES = DEMO ? DEMO_STYLES : LIVE_STYLES
 import { CATEGORIES, type Poi, type PoiCategory, type BBox } from '../lib/poi'
 import type { Position } from '../lib/types'
 import { NIGER_CENTER } from '../data/places'
@@ -67,6 +70,25 @@ function makeCount(label: string, size = 44) {
   g.textBaseline = 'middle'
   g.fillText(label, size / 2, size / 2 + 1)
   return g.getImageData(0, 0, size, size)
+}
+
+/** Libellé dessiné en image (aperçu sans polices réseau) */
+function makeLabel(text: string, color: string, halo: string) {
+  const c = document.createElement('canvas')
+  const g = c.getContext('2d')!
+  const font = 'bold 22px system-ui, sans-serif'
+  g.font = font
+  const w = Math.ceil(g.measureText(text.toUpperCase()).width) + 12
+  c.width = w
+  c.height = 32
+  g.font = font
+  g.textBaseline = 'middle'
+  g.lineWidth = 5
+  g.strokeStyle = halo
+  g.strokeText(text.toUpperCase(), 6, 16)
+  g.fillStyle = color
+  g.fillText(text.toUpperCase(), 6, 16)
+  return g.getImageData(0, 0, c.width, c.height)
 }
 
 export default function MapView(p: Props) {
@@ -157,8 +179,12 @@ export default function MapView(p: Props) {
     })
     // Nombre des grappes dessiné en image (aucune police réseau nécessaire)
     m.on('styleimagemissing', (e) => {
-      if (!e.id.startsWith('n-') || m.hasImage(e.id)) return
-      m.addImage(e.id, makeCount(e.id.slice(2)), { pixelRatio: 2 })
+      if (m.hasImage(e.id)) return
+      if (e.id.startsWith('n-')) m.addImage(e.id, makeCount(e.id.slice(2)), { pixelRatio: 2 })
+      else if (e.id.startsWith('lbl-')) {
+        const dark = (m.getStyle()?.name ?? '').match(/Nuit|Satellite/)
+        m.addImage(e.id, makeLabel(e.id.slice(4), dark ? '#fff' : '#111', dark ? '#000' : '#fff'), { pixelRatio: 2 })
+      }
     })
     m.on('error', (e) => {
       console.warn('[carte]', e.error?.message)

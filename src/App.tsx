@@ -1,4 +1,5 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom'
+import { DEMO } from './lib/demo'
 import { StoreProvider, useStore } from './lib/store'
 import Layout from './components/Layout'
 import { SyncManager, TripWatcher } from './components/Background'
@@ -55,9 +56,15 @@ export default function App() {
   return (
     <ErrorBoundary>
       <StoreProvider>
-        <BrowserRouter>
-          <Shell />
-        </BrowserRouter>
+        {DEMO ? (
+          <MemoryRouter>
+            <Shell />
+          </MemoryRouter>
+        ) : (
+          <BrowserRouter>
+            <Shell />
+          </BrowserRouter>
+        )}
       </StoreProvider>
     </ErrorBoundary>
   )

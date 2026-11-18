@@ -1,5 +1,6 @@
 import { findCity } from '../data/places'
 import { distanceKm } from './geo'
+import { DEMO, DEMO_ROUTE } from './demo'
 
 export type LngLat = [number, number]
 export type Route = { coords: LngLat[]; km: number; minutes?: number; source: 'osrm' | 'direct' }
@@ -20,6 +21,11 @@ export async function geocode(name: string): Promise<{ lat: number; lng: number 
 /** Itinéraire routier (OSRM). Repli en ligne droite si hors ligne ou en échec. */
 export async function route(from: { lat: number; lng: number }, to: { lat: number; lng: number }): Promise<Route> {
   const direct: Route = { coords: [[from.lng, from.lat], [to.lng, to.lat]], km: distanceKm(from, to), source: 'direct' }
+  if (DEMO) {
+    const z = DEMO_ROUTE[DEMO_ROUTE.length - 1]
+    if (Math.abs(to.lng - z[0]) < 0.05 && Math.abs(to.lat - z[1]) < 0.05) return { coords: DEMO_ROUTE, km: 902, minutes: 660, source: 'osrm' }
+    return { ...direct, km: direct.km * 1.18, minutes: Math.round((direct.km * 1.18) / 75 * 60), source: 'osrm' }
+  }
   if (!navigator.onLine) return direct
   try {
     const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`)
