@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(({ mode }) => ({
   // Aperçu privé : chemins relatifs, pas de service worker
-  base: mode === 'demo' ? './' : '/',
+  base: mode === 'demo' ? './' : (process.env.BASE_PATH ?? '/'),
   build: mode === 'demo' ? { outDir: 'dist-demo' } : undefined,
   plugins: [
     react(),
@@ -16,18 +16,19 @@ export default defineConfig(({ mode }) => ({
         short_name: 'NIGORA',
         description: 'Préparer ses trajets, alerter en cas d’urgence, partager son profil médical — même hors connexion.',
         lang: 'fr',
-        start_url: '/',
+        start_url: '.',
+        scope: '.',
         display: 'standalone',
         background_color: '#050505',
         theme_color: '#050505',
         icons: [
-          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
-        navigateFallback: '/index.html',
+        navigateFallback: 'index.html',
         globPatterns: ['**/*.{js,mjs,css,html,svg,png,woff,woff2}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [

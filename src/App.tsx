@@ -61,7 +61,7 @@ export default function App() {
             <Shell />
           </MemoryRouter>
         ) : (
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || '/'}>
             <Shell />
           </BrowserRouter>
         )}

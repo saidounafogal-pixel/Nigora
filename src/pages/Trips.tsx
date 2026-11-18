@@ -219,7 +219,7 @@ export function TripDetail() {
   const [shareMsg, setShareMsg] = useState('')
   if (!trip) return <Empty icon={<Route size={36} />} title="Trajet introuvable" action={<ButtonLink to="/trajets">Retour</ButtonLink>} />
 
-  const shareUrl = cloudEnabled && trip.shareToken ? `${location.origin}/suivi/${trip.shareToken}` : undefined
+  const shareUrl = cloudEnabled && trip.shareToken ? `${location.origin}${import.meta.env.BASE_URL}suivi/${trip.shareToken}` : undefined
   const text = tripText(trip, state.medical.fullName, trip.positions.at(-1) ?? state.lastPosition, shareUrl)
   const live = trip.status === 'active' || trip.status === 'overdue'
 

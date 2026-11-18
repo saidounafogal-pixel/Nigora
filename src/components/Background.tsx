@@ -64,7 +64,7 @@ export function TripWatcher() {
           notified.current.add(trip.id)
           navigator.vibrate?.([300, 150, 300])
           if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('NIGORA — êtes-vous bien arrivé·e ?', { body: `Arrivée prévue à ${trip.to} dépassée. Confirmez ou prévenez vos contacts.`, icon: '/icon-192.png' })
+            new Notification('NIGORA — êtes-vous bien arrivé·e ?', { body: `Arrivée prévue à ${trip.to} dépassée. Confirmez ou prévenez vos contacts.`, icon: `${import.meta.env.BASE_URL}icon-192.png` })
           }
         }
         continue
